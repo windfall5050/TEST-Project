@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>로또 번호 추천기</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f7fb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      background: white;
+      padding: 50px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+      width: 400px;
+    }
+
+    h1 {
+      color: #1b2a4e; /* 네이비 */
+      margin-bottom: 25px;
+    }
+
+    button {
+      background: linear-gradient(135deg, #ff6f91, #ff9472); /* 코랄핑크 유지 */
+      border: none;
+      padding: 15px 35px;
+      font-size: 16px;
+      color: white;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(255, 111, 145, 0.3);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 111, 145, 0.5);
+    }
+
+    .set {
+      margin-top: 20px;
+    }
+
+    .ball {
+      display: inline-block;
+      width: 38px;
+      height: 38px;
+      line-height: 38px;
+      margin: 4px;
+      border-radius: 50%;
+      background: #1b2a4e; /* 네이비 */
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .set-title {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🎯 로또 번호 추천</h1>
+  <button onclick="generateLotto()">5조합 추천받기</button>
+  <div id="result"></div>
+</div>
+
+<script>
+  const weightedNumbers = [];
+
+  function initWeights() {
+    for (let i = 1; i <= 45; i++) {
+      let weight = Math.random();
+
+      // "자주 나온 느낌" 가중치
+      if ([7, 12, 23, 27, 34, 40].includes(i)) {
+        weight += 1.5;
+      }
+
+      // 균형 잡기 (중간 숫자 강조)
+      if (i >= 15 && i <= 30) {
+        weight += 0.5;
+      }
+
+      weightedNumbers.push({ number: i, weight: weight });
+    }
+  }
+
+  function pickNumber(pool) {
+    const totalWeight = pool.reduce((sum, n) => sum + n.weight, 0);
+    let rand = Math.random() * totalWeight;
+
+    for (let i = 0; i < pool.length; i++) {
+      if (rand < pool[i].weight) {
+        return pool.splice(i, 1)[0].number;
+      }
+      rand -= pool[i].weight;
+    }
+  }
+
+  function generateOneSet() {
+    const pool = JSON.parse(JSON.stringify(weightedNumbers));
+    const result = [];
+
+    for (let i = 0; i < 6; i++) {
+      result.push(pickNumber(pool));
+    }
+
+    return result.sort((a, b) => a - b);
+  }
+
+  function generateLotto() {
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = "";
+
+    for (let i = 0; i < 5; i++) {
+      const set = generateOneSet();
+
+      const setDiv = document.createElement("div");
+      setDiv.className = "set";
+
+      const title = document.createElement("div");
+      title.className = "set-title";
+      title.innerText = `${i + 1}번 조합`;
+
+      setDiv.appendChild(title);
+
+      set.forEach(num => {
+        const span = document.createElement("span");
+        span.className = "ball";
+        span.innerText = num;
+        setDiv.appendChild(span);
+      });
+
+      resultDiv.appendChild(setDiv);
+    }
+  }
+
+  initWeights();
+</script>
+
+</body>
+</html>
